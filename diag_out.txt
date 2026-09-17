@@ -1,0 +1,7 @@
+﻿BasePath=C:\Users\edretaki\AppData\Local\Temp\excelimp_diag\bin\Release\net8.0\
+CTCOLLECT=[Server=LAWPRODSRVNEW;Database=CTCOLLECT;Trusted_Connection=True;TrustServerCertificate=True;]
+ExpensesDb=[]
+ScannedRoot=[W:\expenses\SCANNED]
+HasValid=True
+DB_OK table= FOR_DROP_CAMPAINGNS_M10
+CONTRACT fakelos=ALPHA-31670 newfakelos2=CPL_LG-6165

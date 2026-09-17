@@ -1,117 +1,117 @@
-# Excel Importer — Αναφορά Εφαρμογής
+# Excel Importer — Application Report
 
-## Σκοπός
+## Purpose
 
-Εφαρμογή Windows Forms σε C# για εισαγωγή δεδομένων από αρχεία Excel (`.xls` / `.xlsx`) και δημιουργία **συντομεύσεων (`.lnk`)** σε φακέλους προορισμού, με βάση αντιστοίχιση στοιχείων κάθε γραμμής.
-
----
-
-## Ροή εργασίας
-
-1. **Αρχική οθόνη:** panel αναμονής για drag & drop (ή κουμπί «Προσθήκη Excel...»).
-2. **Οπτικό feedback κατά το drag:**
-   - πράσινο panel → έγκυρο αρχείο (`.xls` / `.xlsx`)
-   - κόκκινο panel → μη έγκυρο αρχείο
-3. **Εισαγωγή:** ανάγνωση κεφαλίδων και γραμμών από το Excel.
-4. **Preview:** εμφάνιση αποτελεσμάτων σε grid — **χωρίς** αποστολή ακόμα.
-5. **Αποστολή:** μόνο μετά από επιβεβαίωση χρήστη δημιουργούνται οι συντομεύσεις στους φακέλους.
+A C# Windows Forms application that imports data from Excel files (`.xls` / `.xlsx`) and creates **shortcuts (`.lnk`)** in destination folders, based on matching fields from each row.
 
 ---
 
-## Στήλες που εμφανίζονται στο Preview
+## Workflow
 
-| Στήλη | Περιγραφή |
-|--------|-----------|
-| Δικαστήριο | Από κεφαλίδα `ΔΙΚΑΣΤΗΡΙΟ` |
-| ΑΦΜ | Από κεφαλίδα `ΑΦΜ` |
-| Host Account | Από κεφαλίδα `Host Account` |
-| Σχόλια | Από κεφαλίδα `ΣΧΟΛΙΟ/ΕΝΕΡΓΕΙΑ` |
-| ΓΑΚ | Από κεφαλίδα `ΓΑΚ` |
-| ΕΑΚ | Από κεφαλίδα `ΕΑΚ` |
-| Ημερομηνία | Από κεφαλίδα `ΗΜΕΡΟΜΗΝΙΑ ΔΙΚΑΣΙΜΟΥ` |
-| Μήνυμα | Κατάσταση / σφάλμα ανά γραμμή |
-
-Επιπλέον απαιτείται στο Excel η στήλη **Ονοματεπώνυμο** (`ΟΝΟΜΑΤΕΠΩΝΥΜΟ`) για την ταυτοποίηση — δεν εμφανίζεται στο grid.
+1. **Start screen:** waiting panel for drag & drop (or the “Add Excel...” button).
+2. **Drag visual feedback:**
+   - green panel → valid file (`.xls` / `.xlsx`)
+   - red panel → invalid file
+3. **Import:** reads headers and rows from Excel.
+4. **Preview:** shows results in a grid — **no** send yet.
+5. **Send:** shortcuts are created in the destination folders only after user confirmation.
 
 ---
 
-## Κανόνες εισαγωγής Excel
+## Columns shown in Preview
 
-- Δέχονται μόνο `.xls` και `.xlsx`.
-- Αν λείπουν υποχρεωτικές κεφαλίδες, εμφανίζεται μήνυμα:  
-  **«Δεν βρέθηκαν όλα τα πεδία (…)»**.
-- Το drag & drop απορρίπτεται αν υπάρχει μείγμα έγκυρων και μη έγκυρων αρχείων.
+| Column | Description |
+|--------|-------------|
+| Court | From header `ΔΙΚΑΣΤΗΡΙΟ` |
+| Tax ID (AFM) | From header `ΑΦΜ` |
+| Host Account | From header `Host Account` |
+| Comments | From header `ΣΧΟΛΙΟ/ΕΝΕΡΓΕΙΑ` |
+| GAK | From header `ΓΑΚ` |
+| EAK | From header `ΕΑΚ` |
+| Date | From header `ΗΜΕΡΟΜΗΝΙΑ ΔΙΚΑΣΙΜΟΥ` |
+| Message | Status / error per row |
+
+The Excel file must also include **Full name** (`ΟΝΟΜΑΤΕΠΩΝΥΜΟ`) for matching — it is not shown in the grid.
 
 ---
 
-## Αντιστοίχιση φακέλου προορισμού
+## Excel import rules
 
-Για κάθε γραμμή:
+- Only `.xls` and `.xlsx` are accepted.
+- If required headers are missing, a message is shown:  
+  **“Not all fields were found (…)”**.
+- Drag & drop is rejected if valid and invalid files are mixed.
 
-1. Αναζήτηση με **Host Account** (ισοδύναμο contract / live contract).
-2. Επιβεβαίωση με **ΓΑΚ** και τα **5 πρώτα γράμματα** του ονοματεπωνύμου.
-3. Έλεγχος εγκυρότητας φακέλου μεταξύ των δύο πηγών δεδομένων.
-4. Προορισμός συντόμευσης:
+---
+
+## Destination folder matching
+
+For each row:
+
+1. Lookup by **Host Account** (contract / live contract equivalent).
+2. Confirm with **GAK** and the **first 5 characters** of the full name.
+3. Validate folder consistency across the two data sources.
+4. Shortcut destination:
 
 ```text
 {ScannedRoot}\{newfakelos2}\{fakelos}\
 ```
 
-όπου `ScannedRoot` ορίζεται στις ρυθμίσεις εφαρμογής και τα `newfakelos2` / `fakelos` προκύπτουν από την αντιστοίχιση.
+`ScannedRoot` is defined in application settings; `newfakelos2` and `fakelos` come from the matching process.
 
-- **Δεν δημιουργούνται φάκελοι** — χρησιμοποιείται μόνο υπάρχον path.
-- Αν η συντόμευση υπάρχει ήδη, **δεν ξαναδημιουργείται**.
-
----
-
-## Αποστολή συντόμευσης
-
-- Δημιουργείται τοπικά αρχείο `.lnk` που δείχνει στο αρχικό Excel.
-- Μεταφέρεται στον φάκελο προορισμού με ασφαλή πρόσβαση δικτύου (impersonation), όπως σε αντίστοιχες εσωτερικές εφαρμογές του οργανισμού.
-- Για network paths χρησιμοποιείται UNC (όχι mapped drive letter), ώστε η πρόσβαση να λειτουργεί σωστά υπό impersonation.
-
-Το κουμπί **Αποστολή** ενεργοποιείται μόνο όταν υπάρχει τουλάχιστον μία γραμμή σε κατάσταση **Έτοιμο**.
+- **Folders are not created** — only existing paths are used.
+- If the shortcut already exists, **it is not created again**.
 
 ---
 
-## Καταστάσεις Preview
+## Sending shortcuts
 
-| Κατάσταση | Χρώμα | Σημασία |
-|-----------|--------|---------|
-| Έτοιμο | Πράσινο | Μπορεί να σταλεί |
-| Υπάρχει ήδη / Διπλότυπο | Κίτρινο | Παραλείπεται |
-| Σφάλμα | Πορτοκαλί | Δεν στέλνεται — λεπτομέρεια στη στήλη Μήνυμα |
+- A `.lnk` file is created locally, pointing to the original Excel file.
+- It is written to the destination folder using secured network access (impersonation), consistent with related internal tools.
+- Network paths use UNC form (not a mapped drive letter) so access works correctly under impersonation.
 
----
-
-## Ρυθμίσεις (`appsettings.json`)
-
-- **Connection string** προς τη βάση δεδομένων επιχειρησιακών φακέλων.
-- **ScannedRoot:** ρίζα φακέλων scanned (προτιμητέα μορφή UNC).
-- **Impersonation:** domain / χρήστης / κωδικός για εγγραφή στο δίκτυο.
+The **Send** button is enabled only when at least one row is in **Ready** status.
 
 ---
 
-## Τεχνολογίες
+## Preview statuses
+
+| Status | Color | Meaning |
+|--------|--------|---------|
+| Ready | Green | Can be sent |
+| Already exists / Duplicate | Yellow | Skipped |
+| Error | Orange | Not sent — details in the Message column |
+
+---
+
+## Configuration (`appsettings.json`)
+
+- **Connection string** to the business folder database.
+- **ScannedRoot:** root of scanned folders (UNC form preferred).
+- **Impersonation:** domain / user / password for network write access.
+
+---
+
+## Technologies
 
 - .NET 8 Windows Forms  
-- ClosedXML / ExcelDataReader (ανάγνωση Excel)  
+- ClosedXML / ExcelDataReader (Excel reading)  
 - Microsoft.Data.SqlClient  
 - Microsoft.Extensions.Configuration.Json  
 
 ---
 
-## Εκτέλεση
+## How to run
 
 ```powershell
 cd ExcelImporter
 dotnet run
 ```
 
-Ή άνοιγμα του `ExcelImporter.csproj` και εκτέλεση από το IDE.
+Or open `ExcelImporter.csproj` and run from the IDE.
 
 ---
 
-## Σύνοψη
+## Summary
 
-Η εφαρμογή επιτρέπει ελεγχόμενη εισαγωγή Excel, προεπισκόπηση αποτελεσμάτων και στοχευμένη τοποθέτηση συντομεύσεων σε υπάρχοντες φακέλους, με έλεγχο εγκυρότητας και χωρίς διπλότυπες συντομεύσεις.
+The application provides controlled Excel import, preview of results, and targeted placement of shortcuts into existing folders, with validation and without duplicate shortcuts.

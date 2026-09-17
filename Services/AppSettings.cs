@@ -32,14 +32,12 @@ public sealed class AppSettings
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
             .Build();
 
-        // Προτεραιότητα: CTCOLLECT, αλλιώς ExpensesDb (παλιό όνομα)
-        var connectionString = config.GetConnectionString("CTCOLLECT")?.Trim()
-            ?? config.GetConnectionString("ExpensesDb")?.Trim()
+        var connectionString = config.GetConnectionString("Database")?.Trim()
             ?? string.Empty;
 
         var scannedRoot = config["Paths:ScannedRoot"]?.Trim();
         if (string.IsNullOrWhiteSpace(scannedRoot))
-            scannedRoot = @"\\srv01\public\expenses\SCANNED";
+            scannedRoot = @"Destination path";
 
         scannedRoot = ImpersonatedFileService.ToUncPath(scannedRoot);
 
